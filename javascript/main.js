@@ -10,6 +10,7 @@ import {
     getStrongPokemonTypes
 } from "./moves.js";
 
+import { fetchPokemonAPI } from "./api.js";
 import { getEvolutionAnalysis } from "./evolution.js";
 
 const pokemonTypes = [
@@ -22,19 +23,15 @@ const pokemonTypes = [
 
 const type1 = document.getElementById("type1");
 const type2 = document.getElementById("type2");
-const singleType = document.getElementById("singleType");
 
 const pokemonForm = document.getElementById("pokemonForm");
-const singleTypeForm = document.getElementById("singleTypeForm");
 const moveForm = document.getElementById("moveForm");
 const evolutionForm = document.getElementById("evolutionForm");
 
 const pokemonResults = document.getElementById("pokemonResults");
-const singleTypeResults = document.getElementById("singleTypeResults");
 const moveResults = document.getElementById("moveResults");
 const evolutionResults = document.getElementById("evolutionResults");
 
-// Populate Pokémon type selectors
 
 pokemonTypes.forEach(function (type) {
     const option1 = document.createElement("option");
@@ -46,14 +43,8 @@ pokemonTypes.forEach(function (type) {
     option2.value = type.toLowerCase();
     option2.textContent = type;
     type2.appendChild(option2);
-
-    const option3 = document.createElement("option");
-    option3.value = type.toLowerCase();
-    option3.textContent = type;
-    singleType.appendChild(option3);
 });
 
-// Display a list of Pokémon
 
 function renderPokemonList(pokemon) {
     const list = document.createElement("ul");
@@ -67,7 +58,58 @@ function renderPokemonList(pokemon) {
     return list;
 }
 
-// Display Pokémon type combinations
+async function renderPokemonCards(pokemon) {
+    const grid = document.createElement("div");
+    grid.className = "pokemon-grid";
+
+    const pokemonData = await Promise.all(
+        pokemon.map(name =>
+            fetchPokemonAPI("/pokemon/" + name)
+        )
+    );
+
+    pokemonData.forEach(data => {
+        const card = document.createElement("div");
+        card.className = "pokemon-card";
+
+        const imageUrl =
+            data.sprites.other["official-artwork"].front_default ||
+            data.sprites.front_default;
+
+        if (imageUrl) {
+            const image = document.createElement("img");
+            image.src = imageUrl;
+            image.alt = data.name;
+
+            card.appendChild(image);
+        }
+
+        const number = document.createElement("p");
+        number.className = "pokemon-number";
+        number.textContent =
+            "#" + String(data.id).padStart(4, "0");
+
+        const name = document.createElement("h3");
+        name.textContent = data.name;
+
+        const types = document.createElement("div");
+        types.className = "pokemon-types";
+
+        data.types.forEach(typeInfo => {
+            const type = document.createElement("span");
+            type.className = "pokemon-type";
+            type.textContent = typeInfo.type.name;
+
+            types.appendChild(type);
+        });
+
+        card.append(number, name, types);
+        grid.appendChild(card);
+    });
+
+    return grid;
+}
+
 
 function renderPokemonCombinations(combinations) {
     const container = document.createElement("div");
@@ -98,7 +140,65 @@ function renderPokemonCombinations(combinations) {
     return container;
 }
 
-// Search Pokémon by two types
+
+async function renderEvolutionCards(pokemonList) {
+    const container = document.createElement("div");
+    container.className = "evolution-chain";
+
+    const pokemonData = await Promise.all(
+        pokemonList.map(pokemon =>
+            fetchPokemonAPI("/pokemon/" + pokemon.name)
+        )
+    );
+
+    pokemonData.forEach((data, index) => {
+        const card = document.createElement("div");
+        card.className = "pokemon-card evolution-card";
+
+        const imageUrl =
+            data.sprites.other["official-artwork"].front_default ||
+            data.sprites.front_default;
+
+        if (imageUrl) {
+            const image = document.createElement("img");
+            image.src = imageUrl;
+            image.alt = data.name;
+            card.appendChild(image);
+        }
+
+        const number = document.createElement("p");
+        number.className = "pokemon-number";
+        number.textContent =
+            "#" + String(data.id).padStart(4, "0");
+
+        const name = document.createElement("h3");
+        name.textContent = data.name;
+
+        const types = document.createElement("div");
+        types.className = "pokemon-types";
+
+        data.types.forEach(typeInfo => {
+            const type = document.createElement("span");
+            type.className = "pokemon-type";
+            type.textContent = typeInfo.type.name;
+            types.appendChild(type);
+        });
+
+        card.append(number, name, types);
+        container.appendChild(card);
+
+        if (index < pokemonData.length - 1) {
+            const arrow = document.createElement("span");
+            arrow.className = "evolution-arrow";
+            arrow.textContent = "→";
+            container.appendChild(arrow);
+        }
+    });
+
+    return container;
+}
+
+
 
 pokemonForm.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -136,7 +236,7 @@ pokemonForm.addEventListener("submit", async function (event) {
 
             pokemonResults.appendChild(message);
             pokemonResults.appendChild(
-                renderPokemonList(pokemon)
+                await renderPokemonCards(pokemon)
             );
         } else {
             const message = document.createElement("p");
@@ -156,54 +256,6 @@ pokemonForm.addEventListener("submit", async function (event) {
     }
 });
 
-// Search Pokémon by one type
-
-singleTypeForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const selectedType = singleType.value;
-
-    if (!selectedType) {
-        return;
-    }
-
-    singleTypeResults.textContent = "Loading Pokémon...";
-
-    try {
-        const pokemon = await getPokemonByType(selectedType);
-
-        singleTypeResults.replaceChildren();
-
-        if (pokemon.length > 0) {
-            const message = document.createElement("p");
-
-            message.textContent =
-                "Found " + pokemon.length +
-                " Pokémon of type " + selectedType + ".";
-
-            singleTypeResults.appendChild(message);
-            singleTypeResults.appendChild(
-                renderPokemonList(pokemon)
-            );
-        } else {
-            const message = document.createElement("p");
-
-            message.textContent =
-                "No Pokémon found with this type.";
-
-            singleTypeResults.appendChild(message);
-        }
-
-    } catch (error) {
-        console.error(error);
-
-        singleTypeResults.textContent =
-            "An error occurred while querying the information. " +
-            "Please check the URL and try again.";
-    }
-});
-
-// Search move information
 
 moveForm.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -274,7 +326,6 @@ moveForm.addEventListener("submit", async function (event) {
     }
 });
 
-// Search Pokémon weak against a move
 
 async function searchWeakPokemon(moveName) {
     moveResults.textContent = "Loading Pokémon...";
@@ -312,7 +363,6 @@ async function searchWeakPokemon(moveName) {
     }
 }
 
-// Search Pokémon strong against a move
 
 async function searchStrongPokemon(moveName) {
     moveResults.textContent = "Loading Pokémon...";
@@ -352,7 +402,6 @@ async function searchStrongPokemon(moveName) {
     }
 }
 
-// Analyze Pokémon evolution chain
 
 evolutionForm.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -378,17 +427,7 @@ evolutionForm.addEventListener("submit", async function (event) {
             const heading = document.createElement("h2");
             heading.textContent = "Evolution Chain";
 
-            const chain = document.createElement("p");
-
-            const chainLabel = document.createElement("strong");
-            chainLabel.textContent = "Chain: ";
-
-            chain.append(
-                chainLabel,
-                document.createTextNode(
-                    path.pokemon.map(p => p.name).join(" → ")
-                )
-            );
+            const chain = await renderEvolutionCards(path.pokemon);
 
             evolutionResults.append(heading, chain);
 
