@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pokémon Explorer</title>
+
+    <link rel="stylesheet" href="./css/style.css">
+    <script type="module" src="./javascript/main.js"></script>
+</head>
+
+<body>
+    <h1>Pokémon Explorer</h1>
+    <main>
+        <section id="pokemonSection" class="section">
+            <h2>Pokémon by Two Types</h2>
+
+            <p>
+                Choose two types to find Pokémon
+                that have both.
+            </p>
+
+            <form id="pokemonForm">
+                <label for="type1">First type:</label>
+
+                <select id="type1" required>
+                    <option value="">Choose a type</option>
+                </select>
+
+                <label for="type2">Second type:</label>
+
+                <select id="type2" required>
+                    <option value="">Choose a type</option>
+                </select>
+
+                <button type="submit">Search Pokémon</button>
+            </form>
+
+            <div id="pokemonResults" class="results" aria-live="polite"></div>
+        </section>
+
+        <section id="moveSection" class="section">
+            <h2>Search moves</h2>
+
+            <p>
+                Enter the name of a move to view its details and type relationships.
+            </p>
+
+            <form id="moveForm">
+                <label for="moveName">Move name:</label>
+
+                <input
+                    type="text"
+                    id="moveName"
+                    placeholder=""
+                    value=""
+                    required
+                >
+
+                <button type="submit">Search move</button>
+            </form>
+
+            <div id="moveResults" class="results" aria-live="polite"></div>
+        </section>
+
+        <section id="evolutionSection" class="section">
+            <h2>Search evolution chain</h2>
+
+            <p>
+                Enter the name of a Pokémon to view its evolution chain
+                and compare stats across evolutions.
+            </p>
+
+            <form id="evolutionForm">
+                <label for="evolutionPokemon">
+                    Pokémon name:
+                </label>
+
+                <input
+                    type="text"
+                    id="evolutionPokemon"
+                    name="pokemon"
+                    placeholder=""
+                    required
+                >
+
+                <button type="submit">
+                    Analyze evolution
+                </button>
+            </form>
+
+            <div id="evolutionResults" class="results" aria-live="polite"></div>
+        </section>
+    </main>
+</body>
+</html>

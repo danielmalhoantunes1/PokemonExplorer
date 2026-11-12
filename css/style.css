@@ -1,0 +1,147 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f4f4f4;
+    color: #222;
+}
+
+h1 {
+    text-align: center;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 25px 0;
+}
+
+nav a {
+    color: #2764a5;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 5px;
+    background: #2764a5;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #174778;
+}
+
+.section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+select,
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 15px;
+}
+
+.results {
+    margin-top: 20px;
+}
+
+.results h2 {
+    margin-top: 25px;
+}
+
+.results li {
+    margin: 6px 0;
+}
+
+.results a {
+    color: #2764a5;
+}
+
+.results details {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.results summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.results table {
+    border-collapse: collapse;
+    margin: 15px 0;
+    width: 100%;
+    background: white;
+}
+
+.results th,
+.results td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.results th {
+    background: #f4f7fa;
+}
+
+.info {
+    padding: 15px;
+    background: #f4f7fa;
+    border-radius: 8px;
+}
+
+.result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+@media (max-width: 600px) {
+    nav,
+    form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    button,
+    select,
+    input {
+        width: 100%;
+    }
+
+    .results {
+        overflow-x: auto;
+    }
+}
