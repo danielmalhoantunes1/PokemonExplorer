@@ -60,6 +60,14 @@ function renderPokemonList(pokemon) {
     return list;
 }
 
+function makePokemonCardClickable(card, pokemonName) {
+    card.style.cursor = "pointer";
+
+    card.addEventListener("click", function () {
+        showPokemonDetails(pokemonName);
+    });
+}
+
 async function renderPokemonCards(pokemon) {
     const grid = document.createElement("div");
     grid.className = "pokemon-grid";
@@ -73,6 +81,8 @@ async function renderPokemonCards(pokemon) {
     pokemonData.forEach(data => {
         const card = document.createElement("div");
         card.className = "pokemon-card";
+
+        makePokemonCardClickable(card, data.name);
 
         const imageUrl =
             data.sprites.other["official-artwork"].front_default ||
@@ -266,8 +276,7 @@ async function renderEvolutionCards(pokemonList) {
         const card = document.createElement("div");
         card.className = "pokemon-card evolution-card";
         
-        card.setAttribute("role", "button");
-        card.style.cursor = "pointer";
+        makePokemonCardClickable(card, data.name);
 
         const imageUrl =
             data.sprites.other["official-artwork"].front_default ||
@@ -298,9 +307,6 @@ async function renderEvolutionCards(pokemonList) {
             types.appendChild(type);
         });
 
-        card.addEventListener("click", function () {
-            showPokemonDetails(data.name);
-        });
 
         card.append(number, name, types);
         container.appendChild(card);
