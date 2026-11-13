@@ -26,11 +26,9 @@ const type2 = document.getElementById("type2");
 
 const pokemonForm = document.getElementById("pokemonForm");
 const moveForm = document.getElementById("moveForm");
-const evolutionForm = document.getElementById("evolutionForm");
 
 const pokemonResults = document.getElementById("pokemonResults");
 const moveResults = document.getElementById("moveResults");
-const evolutionResults = document.getElementById("evolutionResults");
 
 const pokemonDetailsSection = document.getElementById("pokemonDetailsSection");
 const pokemonDetails = document.getElementById("pokemonDetails");
@@ -578,111 +576,6 @@ async function searchStrongPokemon(moveName) {
     }
 }
 
-
-evolutionForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const pokemon = document
-        .getElementById("evolutionPokemon")
-        .value
-        .trim()
-        .toLowerCase();
-
-    if (!pokemon) {
-        return;
-    }
-
-    evolutionResults.textContent = "Analyzing evolution chain...";
-
-    try {
-        const result = await getEvolutionAnalysis(pokemon);
-
-        evolutionResults.replaceChildren();
-
-        for (const path of result.evolutionPaths) {
-            const heading = document.createElement("h2");
-            heading.textContent = "Evolution Chain";
-
-            const chain = await renderEvolutionCards(path.pokemon);
-
-            evolutionResults.append(heading, chain);
-
-            const pokemonList = path.pokemon;
-
-            if (pokemonList.length === 1) {
-                const message = document.createElement("p");
-
-                message.textContent =
-                    "This Pokémon has no evolutions registered in this chain.";
-
-                evolutionResults.appendChild(message);
-            }
-
-            const table = document.createElement("table");
-
-            const header = document.createElement("tr");
-
-            const statisticHeader = document.createElement("th");
-            statisticHeader.textContent = "Statistic";
-            header.appendChild(statisticHeader);
-
-            for (let i of pokemonList.keys()) {
-                const pokemonHeader = document.createElement("th");
-                pokemonHeader.textContent = pokemonList[i].name;
-                header.appendChild(pokemonHeader);
-
-                if (i < pokemonList.length - 1) {
-                    const differenceHeader = document.createElement("th");
-                    differenceHeader.textContent = "Difference";
-                    header.appendChild(differenceHeader);
-                }
-            }
-
-            table.appendChild(header);
-
-            const stats = Object.keys(pokemonList[0].stats);
-
-            for (const stat of stats) {
-                const row = document.createElement("tr");
-
-                const statName = document.createElement("td");
-                statName.textContent = stat;
-                row.appendChild(statName);
-
-                for (let i of pokemonList.keys()) {
-                    const statValue = document.createElement("td");
-                    statValue.textContent = pokemonList[i].stats[stat];
-                    row.appendChild(statValue);
-
-                    if (i < pokemonList.length - 1) {
-                        const difference =
-                            pokemonList[i + 1].stats[stat] -
-                            pokemonList[i].stats[stat];
-
-                        const formattedDifference = difference > 0
-                            ? "+" + difference
-                            : String(difference);
-
-                        const differenceCell = document.createElement("td");
-                        differenceCell.textContent = formattedDifference;
-                        row.appendChild(differenceCell);
-                    }
-                }
-
-                table.appendChild(row);
-            }
-
-            evolutionResults.appendChild(table);
-        }
-
-    } catch (error) {
-        console.error(error);
-
-        evolutionResults.textContent =
-            "Could not retrieve the evolution chain. " +
-            "Verify the Pokémon name and try again.";
-    }
-});
 
 pokemonDetailsForm.addEventListener("submit", function (event) {
     event.preventDefault();
