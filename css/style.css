@@ -232,3 +232,38 @@ input {
         transform: rotate(90deg);
     }
 }
+
+
+.pokemon-details {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.pokemon-details-image {
+    width: 220px;
+    height: 220px;
+    object-fit: contain;
+}
+
+.pokemon-details-info {
+    flex: 1;
+}
+
+.pokemon-details-info h2 {
+    text-transform: capitalize;
+    margin-top: 0;
+}
+
+@media (max-width: 600px) {
+    .pokemon-details {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .pokemon-details-image {
+        width: 180px;
+        height: 180px;
+    }
+}

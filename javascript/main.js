@@ -32,6 +32,10 @@ const pokemonResults = document.getElementById("pokemonResults");
 const moveResults = document.getElementById("moveResults");
 const evolutionResults = document.getElementById("evolutionResults");
 
+const pokemonDetailsSection = document.getElementById("pokemonDetailsSection");
+const pokemonDetails = document.getElementById("pokemonDetails");
+const pokemonDetailsForm = document.getElementById("pokemonDetailsForm");
+const pokemonDetailsName = document.getElementById("pokemonDetailsName");
 
 pokemonTypes.forEach(function (type) {
     const option1 = document.createElement("option");
@@ -111,6 +115,115 @@ async function renderPokemonCards(pokemon) {
 }
 
 
+async function showPokemonDetails(pokemonName) {
+    pokemonDetailsSection.hidden = false;
+    pokemonDetails.textContent = "Loading Pokémon details...";
+
+    try {
+        const data = await fetchPokemonAPI(
+            "/pokemon/" + pokemonName.toLowerCase()
+        );
+
+        pokemonDetails.replaceChildren();
+
+        const container = document.createElement("div");
+        container.className = "pokemon-details";
+
+        const imageUrl =
+            data.sprites.other["official-artwork"].front_default ||
+            data.sprites.front_default;
+
+        if (imageUrl) {
+            const image = document.createElement("img");
+            image.src = imageUrl;
+            image.alt = data.name;
+            image.className = "pokemon-details-image";
+            container.appendChild(image);
+        }
+
+        const information = document.createElement("div");
+        information.className = "pokemon-details-info";
+
+        const name = document.createElement("h2");
+        name.textContent = data.name;
+
+        const number = document.createElement("p");
+        number.textContent =
+            "#" + String(data.id).padStart(4, "0");
+
+        const types = document.createElement("div");
+        types.className = "pokemon-types";
+
+        data.types.forEach(typeInfo => {
+            const type = document.createElement("span");
+            type.className = "pokemon-type";
+            type.textContent = typeInfo.type.name;
+            types.appendChild(type);
+        });
+
+        const height = document.createElement("p");
+        height.textContent =
+            "Height: " + (data.height / 10) + " m";
+
+        const weight = document.createElement("p");
+        weight.textContent =
+            "Weight: " + (data.weight / 10) + " kg";
+
+        information.append(
+            name,
+            number,
+            types,
+            height,
+            weight
+        );
+
+        container.appendChild(information);
+        pokemonDetails.appendChild(container);
+
+        const evolutionHeading = document.createElement("h3");
+        evolutionHeading.textContent = "Evolution Chain";
+
+        pokemonDetails.appendChild(evolutionHeading);
+
+        try {
+            const evolutionData = await getEvolutionAnalysis(data.name);
+
+            for (const path of evolutionData.evolutionPaths) {
+                const evolutionCards = await renderEvolutionCards(
+                    path.pokemon
+                );
+
+                pokemonDetails.appendChild(evolutionCards);
+
+                const statsHeading = document.createElement("h3");
+                statsHeading.textContent = "Base Stats Comparison";
+
+                pokemonDetails.appendChild(statsHeading);
+
+                const statsTable = renderEvolutionStatsTable(
+                    path.pokemon
+                );
+
+                pokemonDetails.appendChild(statsTable);
+            }
+
+        } catch (error) {
+            console.error("Could not retrieve evolution chain:", error);
+
+            const message = document.createElement("p");
+            message.textContent = "Could not retrieve the evolution chain.";
+
+            pokemonDetails.appendChild(message);
+        }
+
+    } catch (error) {
+        console.error(error);
+
+        pokemonDetails.textContent =
+            "Could not retrieve Pokémon details.";
+    }
+}
+
 function renderPokemonCombinations(combinations) {
     const container = document.createElement("div");
 
@@ -154,6 +267,9 @@ async function renderEvolutionCards(pokemonList) {
     pokemonData.forEach((data, index) => {
         const card = document.createElement("div");
         card.className = "pokemon-card evolution-card";
+        
+        card.setAttribute("role", "button");
+        card.style.cursor = "pointer";
 
         const imageUrl =
             data.sprites.other["official-artwork"].front_default ||
@@ -184,6 +300,10 @@ async function renderEvolutionCards(pokemonList) {
             types.appendChild(type);
         });
 
+        card.addEventListener("click", function () {
+            showPokemonDetails(data.name);
+        });
+
         card.append(number, name, types);
         container.appendChild(card);
 
@@ -198,7 +318,63 @@ async function renderEvolutionCards(pokemonList) {
     return container;
 }
 
+function renderEvolutionStatsTable(pokemonList) {
+    const table = document.createElement("table");
 
+    const header = document.createElement("tr");
+
+    const statisticHeader = document.createElement("th");
+    statisticHeader.textContent = "Statistic";
+    header.appendChild(statisticHeader);
+
+    for (let i = 0; i < pokemonList.length; i++) {
+        const pokemonHeader = document.createElement("th");
+        pokemonHeader.textContent = pokemonList[i].name;
+        header.appendChild(pokemonHeader);
+
+        if (i < pokemonList.length - 1) {
+            const differenceHeader = document.createElement("th");
+            differenceHeader.textContent = "Difference";
+            header.appendChild(differenceHeader);
+        }
+    }
+
+    table.appendChild(header);
+
+    const stats = Object.keys(pokemonList[0].stats);
+
+    for (const stat of stats) {
+        const row = document.createElement("tr");
+
+        const statName = document.createElement("td");
+        statName.textContent = stat;
+        row.appendChild(statName);
+
+        for (let i = 0; i < pokemonList.length; i++) {
+            const statValue = document.createElement("td");
+            statValue.textContent = pokemonList[i].stats[stat];
+            row.appendChild(statValue);
+
+            if (i < pokemonList.length - 1) {
+                const difference =
+                    pokemonList[i + 1].stats[stat] -
+                    pokemonList[i].stats[stat];
+
+                const differenceCell = document.createElement("td");
+
+                differenceCell.textContent = difference > 0
+                    ? "+" + difference
+                    : String(difference);
+
+                row.appendChild(differenceCell);
+            }
+        }
+
+        table.appendChild(row);
+    }
+
+    return table;
+}
 
 pokemonForm.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -506,4 +682,18 @@ evolutionForm.addEventListener("submit", async function (event) {
             "Could not retrieve the evolution chain. " +
             "Verify the Pokémon name and try again.";
     }
+});
+
+pokemonDetailsForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const pokemonName = pokemonDetailsName.value
+        .trim()
+        .toLowerCase();
+
+    if (!pokemonName) {
+        return;
+    }
+
+    showPokemonDetails(pokemonName);
 });
