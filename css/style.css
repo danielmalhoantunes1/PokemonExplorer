@@ -296,3 +296,61 @@ input {
         transform: scale(1);
     }
 }
+
+.move-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.move-property {
+    padding: 15px;
+    background: #f4f7fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.move-property strong {
+    display: block;
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+
+.move-property span {
+    color: #777;
+    font-size: 14px;
+}
+
+.move-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.move-action {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.move-action p {
+    color: #666;
+    margin: 8px 0 15px;
+}
+
+.move-action button {
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .move-info {
+        grid-template-columns: 1fr;
+    }
+
+    .move-actions {
+        grid-template-columns: 1fr;
+    }
+}

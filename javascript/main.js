@@ -269,7 +269,7 @@ async function showPokemonDetails(pokemonName) {
     }
 }
 
-function renderPokemonCombinations(combinations) {
+async function renderPokemonCombinations(combinations) {
     const container = document.createElement("div");
 
     if (!combinations || combinations.length === 0) {
@@ -279,7 +279,7 @@ function renderPokemonCombinations(combinations) {
         return container;
     }
 
-    combinations.forEach(combination => {
+    for (const combination of combinations) {
         const details = document.createElement("details");
         const summary = document.createElement("summary");
 
@@ -287,13 +287,13 @@ function renderPokemonCombinations(combinations) {
             combination.types.join(" + ") +
             " (" + combination.count + " Pokémon)";
 
-        details.appendChild(summary);
-        details.appendChild(
-            renderPokemonList(combination.pokemon)
+        const cards = await renderPokemonCards(
+            combination.pokemon
         );
 
+        details.append(summary, cards);
         container.appendChild(details);
-    });
+    }
 
     return container;
 }
@@ -492,31 +492,41 @@ moveForm.addEventListener("submit", async function (event) {
 
         moveResults.replaceChildren();
 
+        const heading = document.createElement("h3");
+        heading.textContent = move.name;
+
+        const type = document.createElement("p");
+        type.textContent = "Type: " + move.type;
+
         const properties = [
-            ["Name", move.name],
-            ["Type", move.type],
             ["Power", move.power ?? "N/A"],
             ["Accuracy", move.accuracy ?? "N/A"],
             ["Category", move.damageClass]
         ];
 
+        const infoContainer = document.createElement("div");
+        infoContainer.className = "move-info";
+
         properties.forEach(([label, value]) => {
-            const paragraph = document.createElement("p");
+            const property = document.createElement("div");
+            property.className = "move-property";
+
             const strong = document.createElement("strong");
+            strong.textContent = value;
 
-            strong.textContent = label + ": ";
-            paragraph.append(strong, document.createTextNode(value));
+            const span = document.createElement("span");
+            span.textContent = label;
 
-            moveResults.appendChild(paragraph);
+            property.append(strong, span);
+            infoContainer.appendChild(property);
         });
 
         const actions = document.createElement("div");
-        actions.className = "result-actions";
+        actions.className = "result-actions move-actions";
 
         const strongButton = document.createElement("button");
         strongButton.type = "button";
-        strongButton.textContent =
-            "Strong Pokémon against this move";
+        strongButton.textContent = "Strong Pokémon";
 
         strongButton.addEventListener("click", function () {
             searchStrongPokemon(move.name);
@@ -524,15 +534,20 @@ moveForm.addEventListener("submit", async function (event) {
 
         const weakButton = document.createElement("button");
         weakButton.type = "button";
-        weakButton.textContent =
-            "Weak Pokémon against this move";
+        weakButton.textContent = "Weak Pokémon";
 
         weakButton.addEventListener("click", function () {
             searchWeakPokemon(move.name);
         });
 
         actions.append(strongButton, weakButton);
-        moveResults.appendChild(actions);
+
+        moveResults.append(
+            heading,
+            type,
+            infoContainer,
+            actions
+        );
 
     } catch (error) {
         console.error(error);
@@ -568,7 +583,7 @@ async function searchWeakPokemon(moveName) {
 
         moveResults.append(move, type, weakTypes);
         moveResults.appendChild(
-            renderPokemonCombinations(result.pokemonByCombination)
+            await renderPokemonCombinations(result.pokemonByCombination)
         );
 
     } catch (error) {
@@ -607,7 +622,7 @@ async function searchStrongPokemon(moveName) {
 
         moveResults.append(move, type, strongTypes);
         moveResults.appendChild(
-            renderPokemonCombinations(result.pokemonByCombination)
+            await renderPokemonCombinations(result.pokemonByCombination)
         );
 
     } catch (error) {
