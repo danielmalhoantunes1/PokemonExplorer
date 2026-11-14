@@ -132,6 +132,14 @@ async function showPokemonDetails(pokemonName) {
             "/pokemon/" + pokemonName.toLowerCase()
         );
 
+        const speciesData = await fetchPokemonAPI(
+            "/pokemon-species/" + data.species.name
+        );
+
+        const descriptionEntry = speciesData.flavor_text_entries.find(
+            entry => entry.language.name === "en"
+        );
+
         pokemonDetails.replaceChildren();
 
         const container = document.createElement("div");
@@ -154,6 +162,17 @@ async function showPokemonDetails(pokemonName) {
 
         const name = document.createElement("h2");
         name.textContent = data.name;
+        
+        const description = document.createElement("p");
+        description.className = "pokemon-description";
+
+        description.textContent = descriptionEntry
+            ? descriptionEntry.flavor_text
+                .replace(/[\n\f\r]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim()
+            : "No description available.";
+
 
         const number = document.createElement("p");
         number.textContent =
@@ -179,6 +198,7 @@ async function showPokemonDetails(pokemonName) {
 
         information.append(
             name,
+            description,
             number,
             types,
             height,
@@ -218,10 +238,27 @@ async function showPokemonDetails(pokemonName) {
         } catch (error) {
             console.error("Could not retrieve evolution chain:", error);
 
-            const message = document.createElement("p");
-            message.textContent = "Could not retrieve the evolution chain.";
+            const statsHeading = document.createElement("h3");
+            statsHeading.textContent = "Base Stats";
 
-            pokemonDetails.appendChild(message);
+            pokemonDetails.appendChild(statsHeading);
+
+            const stats = {};
+
+            for (const stat of data.stats) {
+                stats[stat.stat.name] = stat.base_stat;
+            }
+
+            const currentPokemon = {
+                name: data.name,
+                stats: stats
+            };
+
+            const statsTable = renderEvolutionStatsTable([
+                currentPokemon
+            ]);
+
+            pokemonDetails.appendChild(statsTable);
         }
 
     } catch (error) {
@@ -482,7 +519,7 @@ moveForm.addEventListener("submit", async function (event) {
             "Strong Pokémon against this move";
 
         strongButton.addEventListener("click", function () {
-            searchWeakPokemon(move.name);
+            searchStrongPokemon(move.name);
         });
 
         const weakButton = document.createElement("button");
@@ -491,7 +528,7 @@ moveForm.addEventListener("submit", async function (event) {
             "Weak Pokémon against this move";
 
         weakButton.addEventListener("click", function () {
-            searchStrongPokemon(move.name);
+            searchWeakPokemon(move.name);
         });
 
         actions.append(strongButton, weakButton);

@@ -44,7 +44,7 @@ export async function getStrongPokemonTypes(moveName) {
         "/type/" + move.type
     );
 
-    const strongTypes = typeData.damage_relations.double_damage_from
+    const strongTypes = typeData.damage_relations.half_damage_to
         .map(type => type.name);
 
     const pokemonByCombination =
