@@ -64,6 +64,11 @@ function makePokemonCardClickable(card, pokemonName) {
     card.style.cursor = "pointer";
 
     card.addEventListener("click", function () {
+        pokemonDetailsSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+        
         showPokemonDetails(pokemonName);
     });
 }
