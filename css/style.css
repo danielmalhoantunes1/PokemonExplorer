@@ -6,6 +6,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
+    min-height: 100vh;
     background-image: url('../images/pokemon-bg.webp');
     background-size: cover;
     background-position: center;
@@ -15,6 +16,23 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+
+main {
+    flex: 1;
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+footer {
+    width: 100%;
+    background: white;
+    padding: 15px 30px;
+    text-align: center;
+    color: #737162;
+}
+
 
 .site-header {
     width: 100%;
@@ -28,14 +46,6 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-}
-
-footer {
-    width: 100%;
-    background: white;
-    padding: 15px 30px;
-    text-align: center;
-    color: #737162;
 }
 
 .logo {
@@ -62,11 +72,6 @@ nav a:hover {
     color: #5C5A4E;
 }
 
-main {
-    max-width: 800px;
-    margin: 30px auto;
-    padding: 0 20px;
-}
 
 .page-intro {
     text-align: center;

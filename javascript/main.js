@@ -1,8 +1,4 @@
-
-import {
-    getPokemonByType,
-    getPokemonWithTypes
-} from "./pokemon.js";
+import { getPokemonWithTypes } from "./pokemon.js";
 
 import {
     getMoveByName,
@@ -26,19 +22,22 @@ const type2 = document.getElementById("type2");
 
 const pokemonForm = document.getElementById("pokemonForm");
 const moveForm = document.getElementById("moveForm");
+const pokemonDetailsForm = document.getElementById("pokemonDetailsForm");
 
 const pokemonResults = document.getElementById("pokemonResults");
 const moveResults = document.getElementById("moveResults");
+const pokemonDetails = document.getElementById("pokemonDetails");
 
 const pokemonDetailsSection = document.getElementById("pokemonDetailsSection");
-const pokemonDetails = document.getElementById("pokemonDetails");
-const pokemonDetailsForm = document.getElementById("pokemonDetailsForm");
 const pokemonDetailsName = document.getElementById("pokemonDetailsName");
 
 function capitalize(word) {
     return word
         .split("-")
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .map(part =>
+            part.charAt(0).toUpperCase() +
+            part.slice(1).toLowerCase()
+        )
         .join("-");
 }
 
@@ -62,7 +61,7 @@ function makePokemonCardClickable(card, pokemonName) {
             behavior: "smooth",
             block: "start"
         });
-        
+
         showPokemonDetails(pokemonName);
     });
 }
@@ -268,36 +267,6 @@ async function showPokemonDetails(pokemonName) {
     }
 }
 
-async function renderPokemonCombinations(combinations) {
-    const container = document.createElement("div");
-
-    if (!combinations || combinations.length === 0) {
-        const message = document.createElement("p");
-        message.textContent = "No results found.";
-        container.appendChild(message);
-        return container;
-    }
-
-    for (const combination of combinations) {
-        const details = document.createElement("details");
-        const summary = document.createElement("summary");
-
-        summary.textContent =
-            combination.types.join(" + ") +
-            " (" + combination.count + " Pokémon)";
-
-        const cards = await renderPokemonCards(
-            combination.pokemon
-        );
-
-        details.append(summary, cards);
-        container.appendChild(details);
-    }
-
-    return container;
-}
-
-
 async function renderEvolutionCards(pokemonList) {
     const container = document.createElement("div");
     container.className = "evolution-chain";
@@ -311,7 +280,7 @@ async function renderEvolutionCards(pokemonList) {
     pokemonData.forEach((data, index) => {
         const card = document.createElement("div");
         card.className = "pokemon-card evolution-card";
-        
+
         makePokemonCardClickable(card, data.name);
 
         const imageUrl =
@@ -416,6 +385,131 @@ function renderEvolutionStatsTable(pokemonList) {
     return table;
 }
 
+async function renderPokemonCombinations(combinations) {
+    const container = document.createElement("div");
+
+    if (!combinations || combinations.length === 0) {
+        const message = document.createElement("p");
+        message.textContent = "No results found.";
+
+        container.appendChild(message);
+        return container;
+    }
+
+    for (const combination of combinations) {
+        const details = document.createElement("details");
+        const summary = document.createElement("summary");
+
+        summary.textContent =
+            combination.types.join(" + ") +
+            " (" + combination.count + " Pokémon)";
+
+        const cards = await renderPokemonCards(
+            combination.pokemon
+        );
+
+        details.append(summary, cards);
+        container.appendChild(details);
+    }
+
+    return container;
+}
+
+
+async function searchWeakPokemon(moveName) {
+    moveResults.textContent = "Loading Pokémon...";
+
+    try {
+        const result = await getWeakPokemonTypes(moveName);
+
+        moveResults.replaceChildren();
+
+        const move = document.createElement("p");
+        move.innerHTML = "<strong>Move:</strong> ";
+        move.appendChild(
+            document.createTextNode(capitalize(result.move))
+        );
+
+        const type = document.createElement("p");
+        type.innerHTML = "<strong>Type:</strong> ";
+        type.appendChild(
+            document.createTextNode(capitalize(result.moveType))
+        );
+
+        const weakTypes = document.createElement("p");
+        weakTypes.innerHTML = "<strong>Weak Types against this move:</strong> ";
+
+        weakTypes.appendChild(
+            document.createTextNode(
+                result.weakTypes
+                    .map(type => capitalize(type))
+                    .join(", ")
+            )
+        );
+
+        moveResults.append(move, type, weakTypes);
+
+        moveResults.appendChild(
+            await renderPokemonCombinations(result.pokemonByCombination)
+        );
+
+    } catch (error) {
+        console.error(error);
+
+        moveResults.textContent =
+            "Could not retrieve Pokémon information. " +
+            "Verify the move name and try again.";
+    }
+}
+
+
+async function searchStrongPokemon(moveName) {
+    moveResults.textContent = "Loading Pokémon...";
+
+    try {
+        const result = await getStrongPokemonTypes(moveName);
+
+        moveResults.replaceChildren();
+
+        const move = document.createElement("p");
+        move.innerHTML = "<strong>Move:</strong> ";
+        move.appendChild(
+            document.createTextNode(capitalize(result.move))
+        );
+
+        const type = document.createElement("p");
+        type.innerHTML = "<strong>Type:</strong> ";
+        type.appendChild(
+            document.createTextNode(capitalize(result.moveType))
+        );
+
+        const strongTypes = document.createElement("p");
+        strongTypes.innerHTML =
+            "<strong>Strong Types against this move:</strong> ";
+
+        strongTypes.appendChild(
+            document.createTextNode(
+                result.strongTypes
+                    .map(type => capitalize(type))
+                    .join(", ")
+            )
+        );
+
+        moveResults.append(move, type, strongTypes);
+
+        moveResults.appendChild(
+            await renderPokemonCombinations(result.pokemonByCombination)
+        );
+
+    } catch (error) {
+        console.error(error);
+
+        moveResults.textContent =
+            "Could not retrieve Pokémon information. " +
+            "Verify the move name and try again.";
+    }
+}
+
 pokemonForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -448,7 +542,8 @@ pokemonForm.addEventListener("submit", async function (event) {
             message.textContent =
                 "Found " + pokemon.length +
                 " Pokémon with the types " +
-                firstType + " and " + secondType + ".";
+                capitalize(firstType) + " and " +
+                capitalize(secondType) + ".";
 
             pokemonResults.appendChild(message);
             pokemonResults.appendChild(
@@ -500,7 +595,7 @@ moveForm.addEventListener("submit", async function (event) {
         const properties = [
             ["Power", move.power ?? "N/A"],
             ["Accuracy", move.accuracy ?? "N/A"],
-            ["Category", capitalize(move.damageClass)],
+            ["Category", capitalize(move.damageClass)]
         ];
 
         const infoContainer = document.createElement("div");
@@ -556,82 +651,6 @@ moveForm.addEventListener("submit", async function (event) {
             "Verify the move name and try again.";
     }
 });
-
-
-async function searchWeakPokemon(moveName) {
-    moveResults.textContent = "Loading Pokémon...";
-
-    try {
-        const result = await getWeakPokemonTypes(moveName);
-
-        moveResults.replaceChildren();
-
-        const move = document.createElement("p");
-        move.innerHTML = "<strong>Move:</strong> ";
-        move.appendChild(document.createTextNode(capitalize(result.move)));
-
-        const type = document.createElement("p");
-        type.innerHTML = "<strong>Type:</strong> ";
-        type.appendChild(document.createTextNode(capitalize(result.moveType)));
-
-        const weakTypes = document.createElement("p");
-        weakTypes.innerHTML = "<strong>Weak Types:</strong> ";
-        weakTypes.appendChild(
-            document.createTextNode(result.weakTypes.map(type => capitalize(type)).join(", "))
-        );
-
-        moveResults.append(move, type, weakTypes);
-        moveResults.appendChild(
-            await renderPokemonCombinations(result.pokemonByCombination)
-        );
-
-    } catch (error) {
-        console.error(error);
-
-        moveResults.textContent =
-            "Could not retrieve Pokémon information. " +
-            "Verify the move name and try again.";
-    }
-}
-
-
-async function searchStrongPokemon(moveName) {
-    moveResults.textContent = "Loading Pokémon...";
-
-    try {
-        const result = await getStrongPokemonTypes(moveName);
-
-        moveResults.replaceChildren();
-
-        const move = document.createElement("p");
-        move.innerHTML = "<strong>Move:</strong> ";
-        move.appendChild(document.createTextNode(capitalize(result.move)));
-
-        const type = document.createElement("p");
-        type.innerHTML = "<strong>Type:</strong> ";
-        type.appendChild(document.createTextNode(capitalize(result.moveType)));
-
-        const strongTypes = document.createElement("p");
-        strongTypes.innerHTML =
-            "<strong>Strong Types against this move:</strong> ";
-
-        strongTypes.appendChild(
-            document.createTextNode(result.strongTypes.map(type => capitalize(type)).join(", "))
-        );
-
-        moveResults.append(move, type, strongTypes);
-        moveResults.appendChild(
-            await renderPokemonCombinations(result.pokemonByCombination)
-        );
-
-    } catch (error) {
-        console.error(error);
-
-        moveResults.textContent =
-            "Could not retrieve Pokémon information. " +
-            "Verify the move name and try again.";
-    }
-}
 
 
 pokemonDetailsForm.addEventListener("submit", function (event) {
