@@ -47,19 +47,6 @@ pokemonTypes.forEach(function (type) {
     type2.appendChild(option2);
 });
 
-
-function renderPokemonList(pokemon) {
-    const list = document.createElement("ul");
-
-    pokemon.forEach(name => {
-        const item = document.createElement("li");
-        item.textContent = name;
-        list.appendChild(item);
-    });
-
-    return list;
-}
-
 function makePokemonCardClickable(card, pokemonName) {
     card.style.cursor = "pointer";
 
