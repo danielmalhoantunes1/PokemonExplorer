@@ -35,6 +35,13 @@ const pokemonDetails = document.getElementById("pokemonDetails");
 const pokemonDetailsForm = document.getElementById("pokemonDetailsForm");
 const pokemonDetailsName = document.getElementById("pokemonDetailsName");
 
+function capitalize(word) {
+    return word
+        .split("-")
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join("-");
+}
+
 pokemonTypes.forEach(function (type) {
     const option1 = document.createElement("option");
     option1.value = type.toLowerCase();
@@ -94,7 +101,7 @@ async function renderPokemonCards(pokemon) {
             "#" + String(data.id).padStart(4, "0");
 
         const name = document.createElement("h3");
-        name.textContent = data.name;
+        name.textContent = capitalize(data.name);
 
         const types = document.createElement("div");
         types.className = "pokemon-types";
@@ -102,7 +109,7 @@ async function renderPokemonCards(pokemon) {
         data.types.forEach(typeInfo => {
             const type = document.createElement("span");
             type.className = "pokemon-type";
-            type.textContent = typeInfo.type.name;
+            type.textContent = capitalize(typeInfo.type.name);
 
             types.appendChild(type);
         });
@@ -153,7 +160,7 @@ async function showPokemonDetails(pokemonName) {
         information.className = "pokemon-details-info";
 
         const name = document.createElement("h2");
-        name.textContent = data.name;
+        name.textContent = capitalize(data.name);
         
         const description = document.createElement("p");
         description.className = "pokemon-description";
@@ -176,7 +183,7 @@ async function showPokemonDetails(pokemonName) {
         data.types.forEach(typeInfo => {
             const type = document.createElement("span");
             type.className = "pokemon-type";
-            type.textContent = typeInfo.type.name;
+            type.textContent = capitalize(typeInfo.type.name);
             types.appendChild(type);
         });
 
@@ -324,7 +331,7 @@ async function renderEvolutionCards(pokemonList) {
             "#" + String(data.id).padStart(4, "0");
 
         const name = document.createElement("h3");
-        name.textContent = data.name;
+        name.textContent = capitalize(data.name);
 
         const types = document.createElement("div");
         types.className = "pokemon-types";
@@ -332,7 +339,7 @@ async function renderEvolutionCards(pokemonList) {
         data.types.forEach(typeInfo => {
             const type = document.createElement("span");
             type.className = "pokemon-type";
-            type.textContent = typeInfo.type.name;
+            type.textContent = capitalize(typeInfo.type.name);
             types.appendChild(type);
         });
 
@@ -362,7 +369,7 @@ function renderEvolutionStatsTable(pokemonList) {
 
     for (let i = 0; i < pokemonList.length; i++) {
         const pokemonHeader = document.createElement("th");
-        pokemonHeader.textContent = pokemonList[i].name;
+        pokemonHeader.textContent = capitalize(pokemonList[i].name);
         header.appendChild(pokemonHeader);
 
         if (i < pokemonList.length - 1) {
@@ -380,7 +387,7 @@ function renderEvolutionStatsTable(pokemonList) {
         const row = document.createElement("tr");
 
         const statName = document.createElement("td");
-        statName.textContent = stat;
+        statName.textContent = capitalize(stat);
         row.appendChild(statName);
 
         for (let i = 0; i < pokemonList.length; i++) {
@@ -485,15 +492,15 @@ moveForm.addEventListener("submit", async function (event) {
         moveResults.replaceChildren();
 
         const heading = document.createElement("h3");
-        heading.textContent = move.name;
+        heading.textContent = capitalize(move.name);
 
         const type = document.createElement("p");
-        type.textContent = "Type: " + move.type;
+        type.textContent = "Type: " + capitalize(move.type);
 
         const properties = [
             ["Power", move.power ?? "N/A"],
             ["Accuracy", move.accuracy ?? "N/A"],
-            ["Category", move.damageClass]
+            ["Category", capitalize(move.damageClass)],
         ];
 
         const infoContainer = document.createElement("div");
@@ -561,16 +568,16 @@ async function searchWeakPokemon(moveName) {
 
         const move = document.createElement("p");
         move.innerHTML = "<strong>Move:</strong> ";
-        move.appendChild(document.createTextNode(result.move));
+        move.appendChild(document.createTextNode(capitalize(result.move)));
 
         const type = document.createElement("p");
         type.innerHTML = "<strong>Type:</strong> ";
-        type.appendChild(document.createTextNode(result.moveType));
+        type.appendChild(document.createTextNode(capitalize(result.moveType)));
 
         const weakTypes = document.createElement("p");
         weakTypes.innerHTML = "<strong>Weak Types:</strong> ";
         weakTypes.appendChild(
-            document.createTextNode(result.weakTypes.join(", "))
+            document.createTextNode(result.weakTypes.map(type => capitalize(type)).join(", "))
         );
 
         moveResults.append(move, type, weakTypes);
@@ -598,18 +605,18 @@ async function searchStrongPokemon(moveName) {
 
         const move = document.createElement("p");
         move.innerHTML = "<strong>Move:</strong> ";
-        move.appendChild(document.createTextNode(result.move));
+        move.appendChild(document.createTextNode(capitalize(result.move)));
 
         const type = document.createElement("p");
         type.innerHTML = "<strong>Type:</strong> ";
-        type.appendChild(document.createTextNode(result.moveType));
+        type.appendChild(document.createTextNode(capitalize(result.moveType)));
 
         const strongTypes = document.createElement("p");
         strongTypes.innerHTML =
             "<strong>Strong Types against this move:</strong> ";
 
         strongTypes.appendChild(
-            document.createTextNode(result.strongTypes.join(", "))
+            document.createTextNode(result.strongTypes.map(type => capitalize(type)).join(", "))
         );
 
         moveResults.append(move, type, strongTypes);
